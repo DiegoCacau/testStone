@@ -7,6 +7,8 @@
 #include <QObject>
 #include <secretkeys.h>
 
+#include <musiclists.h>
+
 
 class Spofity: public QObject
 {
@@ -17,7 +19,8 @@ private:
     bool isLogged;
     QString token;
     QString username;
-    QList< QMap< QString, QMap<QString, QString> > > musicList;
+    QStringList wordList;
+    MusicLists *lists;
 
 public:
     Spofity();
@@ -27,6 +30,8 @@ public:
     void setToken(QString);
     void getUserData();
     QStringList searchMusic(QString);
+    bool listExist(QString);
+    bool addList(QString);
 
 private:
     void login();

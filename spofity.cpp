@@ -12,6 +12,7 @@ Spofity::Spofity()
 {
     this->isLogged = false;
     this->login();
+    this->lists = new MusicLists();
 
     connect(this->getConnection(), &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
              &QDesktopServices::openUrl);
@@ -106,6 +107,7 @@ QStringList Spofity::searchMusic(QString word){
     qDebug() << "\n\n" << url.toString(QUrl::FullyEncoded);
     auto reply = this->connection.get(url.toString());
 
+
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
             return;
@@ -116,20 +118,31 @@ QStringList Spofity::searchMusic(QString word){
         QJsonObject jsonObject = document.object();
         QJsonObject jsonSubObject = jsonObject["tracks"].toObject();
         QJsonArray jsonArray = jsonSubObject["items"].toArray();
+        wordList.clear();
 
         foreach (const QJsonValue & value, jsonArray) {
             QJsonObject obj = value.toObject();
-//            propertyNames.append(obj["PropertyName"].toString());
-//            propertyKeys.append(obj["key"].toString());
             QJsonArray artist = obj["artists"].toArray();
             QJsonObject ob = artist[0].toObject();
 
+            wordList << obj["name"].toString() + " - " + ob["name"].toString();
             qDebug() << obj["name"].toString() << ob["name"].toString() << obj["id"].toString();
         }
-
 
         reply->deleteLater();
     });
 
-    return QStringList();
+    return wordList;
+}
+
+bool Spofity::addList(QString listName){
+    int countBefore = this->lists->count();
+    this->lists->addList(listName);
+    int countAfter = this->lists->count();
+
+    if(countBefore < countAfter){
+        return true;
+    }
+
+    return false;
 }
