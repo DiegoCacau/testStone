@@ -21,11 +21,13 @@ SOURCES += \
     loggedwindow.cpp \
     main.cpp \
     mainwindow.cpp \
+    musiclists.cpp \
     spofity.cpp
 
 HEADERS += \
     loggedwindow.h \
     mainwindow.h \
+    musiclists.h \
     secretkeys.h \
     spofity.h
 
