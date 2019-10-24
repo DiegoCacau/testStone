@@ -21,6 +21,7 @@ private:
     QString username;
     QStringList wordList;
     MusicLists *lists;
+    QMap<QString, QString> tempList;
 
 public:
     Spofity();
@@ -32,6 +33,9 @@ public:
     QStringList searchMusic(QString);
     bool listExist(QString);
     bool addList(QString);
+    void addMusicToList(QString, QString);
+    QStringList getMusicsFromList(QString);
+    void playMusic(QString);
 
 private:
     void login();

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">
@@ -130,6 +130,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_4">
+          <property name="text">
+           <string>Remover Música Selecionada</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -162,13 +169,6 @@
           </property>
           <property name="text">
            <string>Adicionar à Playlist</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="text">
-           <string>Remover Música Selecionada</string>
           </property>
          </widget>
         </item>
@@ -235,6 +235,32 @@
     <attribute name="title">
      <string>Lista Atual</string>
     </attribute>
+    <widget class="QPushButton" name="pushButton_5">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>230</y>
+       <width>89</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Tocar</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_6">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>230</y>
+       <width>89</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Pausar</string>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

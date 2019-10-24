@@ -26,9 +26,27 @@ void MusicLists::addList(QString listName){
         this->lists.insert(listName, musics);
     }
 
-    qDebug() << this->lists;
+    //qDebug() << this->lists;
 }
 
 int MusicLists::count(){
     return this->lists.count();
+}
+
+void MusicLists::addMusicToList(QString listName, QString id, QString music){
+    if(this->listExist(listName)){
+        this->lists.find(listName)->insert(id, music);
+    }
+    qDebug()<<this->lists;
+}
+
+QStringList MusicLists::getMusicsFromList(QString listName){
+
+   QStringList musicList;
+    QMap<QString, QString>::iterator i;
+    for (i = this->lists.find(listName)->begin(); i != this->lists.find(listName)->end(); ++i){
+        musicList << i.value();
+    }
+
+    return musicList;
 }

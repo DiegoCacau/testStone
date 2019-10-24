@@ -5,6 +5,7 @@
 #include <QUrlQuery>
 #include <QJsonArray>
 #include <QVariantMap>
+#include <QMediaPlayer>
 
 #include <QDebug>
 
@@ -52,7 +53,7 @@ void Spofity::setToken(QString token){
     this->token = token;
 }
 
-// aqui decidir quando abrir a outra janela
+// aqui decide quando abrir a outra janela
 void Spofity::authStatusChanged(QAbstractOAuth::Status status)
 {
     QString s;
@@ -106,6 +107,7 @@ QStringList Spofity::searchMusic(QString word){
 
     qDebug() << "\n\n" << url.toString(QUrl::FullyEncoded);
     auto reply = this->connection.get(url.toString());
+    tempList.clear();
 
 
     connect(reply, &QNetworkReply::finished, [=]() {
@@ -118,7 +120,9 @@ QStringList Spofity::searchMusic(QString word){
         QJsonObject jsonObject = document.object();
         QJsonObject jsonSubObject = jsonObject["tracks"].toObject();
         QJsonArray jsonArray = jsonSubObject["items"].toArray();
+
         wordList.clear();
+        tempList.clear();
 
         foreach (const QJsonValue & value, jsonArray) {
             QJsonObject obj = value.toObject();
@@ -126,7 +130,8 @@ QStringList Spofity::searchMusic(QString word){
             QJsonObject ob = artist[0].toObject();
 
             wordList << obj["name"].toString() + " - " + ob["name"].toString();
-            qDebug() << obj["name"].toString() << ob["name"].toString() << obj["id"].toString();
+            //qDebug() << obj["name"].toString() << ob["name"].toString() << obj["id"].toString();
+            tempList.insert( obj["name"].toString() + " - " + ob["name"].toString(), obj["id"].toString());
         }
 
         reply->deleteLater();
@@ -145,4 +150,39 @@ bool Spofity::addList(QString listName){
     }
 
     return false;
+}
+
+void Spofity::addMusicToList(QString musicList, QString music){
+    //qDebug() << this->tempList.value(music);
+    this->lists->addMusicToList(musicList, this->tempList.value(music), music);
+}
+
+QStringList Spofity::getMusicsFromList(QString listName){
+
+    return this->lists->getMusicsFromList(listName);
+}
+
+void Spofity::playMusic(QString id){
+    QUrl u ("https://api.spotify.com/v1/tracks/2xldR7qVr1Mc8qODnSFlav");
+
+    auto reply = this->connection.get(u);
+
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            return;
+        }
+        const auto data = reply->readAll();
+        const auto document = QJsonDocument::fromJson(data);
+        QJsonObject jsonObject = document.object();
+
+        qDebug()<<jsonObject["preview_url"].toString();
+
+        QMediaPlayer* player = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
+        player->setMedia(QUrl(jsonObject["preview_url"].toString()));
+        player->setVolume(80);
+        player->play();
+
+        reply->deleteLater();
+    });
+
 }

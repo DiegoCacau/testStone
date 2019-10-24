@@ -11,6 +11,7 @@ class MusicLists : public QObject
 
 private:
     QMap< QString, QMap<QString, QString> > lists;
+    QString activeList;
 
 public:
     MusicLists();
@@ -18,6 +19,8 @@ public:
     bool listExist(QString);
     void addList(QString);
     int count();
+    void addMusicToList(QString, QString, QString);
+    QStringList getMusicsFromList(QString);
 
 
 signals:

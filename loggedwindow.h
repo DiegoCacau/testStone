@@ -16,6 +16,8 @@ class LoggedWindow : public QWidget
     QCompleter *completer;
     Spofity *sptf;
     QStringListModel *listNames;
+    QStringListModel *musicNames;
+    QModelIndex selectedList;
 
 public:
     explicit LoggedWindow(Spofity *sptf, QWidget *parent = nullptr);
@@ -24,6 +26,10 @@ public:
 private slots:
     void on_lineEdit_2_textChanged(const QString &arg1);
     void on_pushButton_clicked();
+    void on_listView_clicked(const QModelIndex &index);
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_5_clicked();
 
 private:
     Ui::LoggedWindow *ui;
