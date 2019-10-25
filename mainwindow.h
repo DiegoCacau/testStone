@@ -20,7 +20,10 @@ public:
     ~MainWindow();
 
 private slots:
+    // call login method
     void on_pushButton_clicked();
+
+    // change window
     void openLoggedWindow();
 
 private:

@@ -22,25 +22,50 @@ private:
     QStringList wordList;
     MusicLists *lists;
     QMap<QString, QString> tempList;
+    QList<QString> musicsWithUrl;
 
 public:
     Spofity();
     ~Spofity();
     void grant();
+
+    // get connection
     QOAuth2AuthorizationCodeFlow* getConnection();
+
+    // save token
     void setToken(QString);
+
+    // get data from user
     void getUserData();
+
+    // search musics at Spotify API
     QStringList searchMusic(QString);
+
+    // check if playlist exists
     bool listExist(QString);
+
+    // create playlist
     bool addList(QString);
+
+    // add music to playlist
     void addMusicToList(QString, QString);
     QStringList getMusicsFromList(QString);
+
+    // remove music from playlist
+    bool removeMusic(QString, QString);
+
+    // return music url using it's id
+    void addMusicUrl(QString);
+
+    QList<QMediaContent> getMediaFromList(QString);
+
     void playMusic(QString);
 
 private:
     void login();
 
 private slots:
+    // change connection status
     void authStatusChanged(QAbstractOAuth::Status status);
     void granted();
 
