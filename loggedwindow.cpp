@@ -2,6 +2,7 @@
 #include "ui_loggedwindow.h"
 #include <QAbstractItemView>
 #include <QModelIndex>
+#include <QWidget>
 
 #include <QDebug>
 
@@ -19,6 +20,11 @@ LoggedWindow::LoggedWindow(Spofity *sptf, QWidget *parent) :
     musicNames = new QStringListModel(this);
     this->ui->listView_2->setModel(musicNames);
     this->ui->listView_2->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    this->ui->listView_3->setModel(musicNames);
+    this->ui->listView_3->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+
 }
 
 LoggedWindow::~LoggedWindow()
@@ -89,4 +95,27 @@ void LoggedWindow::on_pushButton_3_clicked()
 void LoggedWindow::on_pushButton_5_clicked()
 {
     this->sptf->playMusic("ss");
+}
+
+void LoggedWindow::on_pushButton_7_clicked()
+{
+    this->selectedList = ui->listView->currentIndex();
+
+    QString rowValue = this->listNames->itemData(this->selectedList)[0].toString();
+    QStringList musicsNames = this->sptf->getMusicsFromList(rowValue);
+
+    this->musicNames->setStringList( QStringList{} );
+
+    for ( const auto& name : musicsNames  )
+    {
+        musicNames->insertRow(musicNames->rowCount());
+        QModelIndex index = musicNames->index(musicNames->rowCount() - 1);
+        musicNames->setData(index, name);
+    }
+}
+
+void LoggedWindow::on_pushButton_2_clicked()
+{
+    QWidget* w = this->ui->tabWidget->findChild<QWidget*>("tab_3");
+    this->ui->tabWidget->setCurrentWidget(w);
 }

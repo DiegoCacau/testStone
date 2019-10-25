@@ -208,6 +208,25 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_7">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>200</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Editar Lista</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="pushButton_2">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -238,10 +257,10 @@
     <widget class="QPushButton" name="pushButton_5">
      <property name="geometry">
       <rect>
-       <x>90</x>
-       <y>230</y>
-       <width>89</width>
-       <height>25</height>
+       <x>80</x>
+       <y>180</y>
+       <width>241</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -251,14 +270,37 @@
     <widget class="QPushButton" name="pushButton_6">
      <property name="geometry">
       <rect>
-       <x>230</x>
-       <y>230</y>
-       <width>89</width>
-       <height>25</height>
+       <x>470</x>
+       <y>180</y>
+       <width>201</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
       <string>Pausar</string>
+     </property>
+    </widget>
+    <widget class="QListView" name="listView_3">
+     <property name="geometry">
+      <rect>
+       <x>75</x>
+       <y>230</y>
+       <width>601</width>
+       <height>192</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QSlider" name="horizontalSlider">
+     <property name="geometry">
+      <rect>
+       <x>199</x>
+       <y>70</y>
+       <width>331</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </widget>

@@ -163,7 +163,7 @@ QStringList Spofity::getMusicsFromList(QString listName){
 }
 
 void Spofity::playMusic(QString id){
-    QUrl u ("https://api.spotify.com/v1/tracks/2xldR7qVr1Mc8qODnSFlav");
+    QUrl u ("https://api.spotify.com/v1/tracks/" + id);
 
     auto reply = this->connection.get(u);
 
