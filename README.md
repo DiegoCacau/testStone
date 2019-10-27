@@ -27,3 +27,10 @@ Em seguida o usuário deverá selecionar a playlist que deseja editar e somente 
 - Apesar de já ter lido bastante sobre testes, nunca tive que fazê-los em "produção" e sinto que me enrolei um pouco com os testes da aplicação gráfica;
 - Minha falta de atenção, que fez com que eu só percebesse que tinha nomeado a classe como "Spofity" quando já estava quase acabando, o que me levou a decisão de adotar esse nome;
 - Eu ter gasto quase 2 dias lembrando como escrever códigos em C++ e Qt; 
+
+
+## Referências
+- https://developer.spotify.com/
+- http://blog.davidecoppola.com/2017/11/cpp-unit-testing-with-qt-test-introduction/
+- https://adminundcode.de/using-spotify-webapi-with-qt/
+- https://github.com/klatooine/klatoplayer
