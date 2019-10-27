@@ -4,6 +4,12 @@
 #include <QMainWindow>
 #include <spofity.h>
 #include "loggedwindow.h"
+#include "ui_mainwindow.h"
+#include"spofity.h"
+#include <QtNetworkAuth>
+#include <QJsonDocument>
+#include <QDesktopServices>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

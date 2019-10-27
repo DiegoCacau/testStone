@@ -1,5 +1,4 @@
 #include "musiclists.h"
-#include <QDebug>
 
 MusicLists::MusicLists()
 {
@@ -7,7 +6,8 @@ MusicLists::MusicLists()
 }
 
 MusicLists::~MusicLists(){
-
+    this->lists.clear();
+    this->musics.clear();
 }
 
 
@@ -20,8 +20,8 @@ bool MusicLists::listExist(QString listName){
 
 Music* MusicLists::musicExists(QString id){
     for ( int i=0; i<this->musics.count(); i++ ) {
-        if(musics[0]->id == id)
-            return musics[0];
+        if(this->musics[0]->id == id)
+            return this->musics[0];
     }
 
     return new Music();

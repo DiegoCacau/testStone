@@ -1,12 +1,4 @@
 #include "spofity.h"
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QDesktopServices>
-#include <QUrlQuery>
-#include <QJsonArray>
-#include <QVariantMap>
-#include <QMediaPlayer>
-
 #include <QDebug>
 
 Spofity::Spofity()
@@ -19,16 +11,16 @@ Spofity::Spofity()
     connect(this->getConnection(), &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
              &QDesktopServices::openUrl);
 
-    connect(this->getConnection(), &QOAuth2AuthorizationCodeFlow::statusChanged,
-            this, &Spofity::authStatusChanged);
-
     connect(this->getConnection(), &QOAuth2AuthorizationCodeFlow::granted,
             this, &Spofity::granted);
 
 }
 
 Spofity::~Spofity(){
-
+    this->wordList.clear();
+    delete this->lists;
+    this->tempList.clear();
+    this->musicsWithUrl.clear();
 }
 
 
@@ -54,17 +46,6 @@ void Spofity::setToken(QString token){
     this->token = token;
 }
 
-void Spofity::authStatusChanged(QAbstractOAuth::Status status)
-{
-    QString s;
-    if (status == QAbstractOAuth::Status::Granted)
-        s = "granted";
-
-    if (status == QAbstractOAuth::Status::TemporaryCredentialsReceived) {
-        s = "temp credentials";
-    }
-
-}
 
 void Spofity::granted ()
 {
@@ -73,8 +54,6 @@ void Spofity::granted ()
     this->isLogged = true;
 
     this->getUserData();
-
-    emit(this->openAfterLogin());
 }
 
 void Spofity::getUserData(){
@@ -90,7 +69,11 @@ void Spofity::getUserData(){
 
         const auto document = QJsonDocument::fromJson(data);
         const auto root = document.object();
-        username = root.value("display_name").toString();
+        this->username = root.value("display_name").toString();
+
+        if(!this->username.isEmpty()){
+            emit(this->openAfterLogin());
+        }
 
         reply->deleteLater();
     });
@@ -100,7 +83,7 @@ QStringList Spofity::searchMusic(QString word){
     QUrlQuery url ("https://api.spotify.com/v1/search?type=track&limit=20&q=" + word);
 
     auto reply = this->connection.get(url.toString());
-    tempList.clear();
+    this->tempList.clear();
 
 
     connect(reply, &QNetworkReply::finished, [=]() {
@@ -114,22 +97,22 @@ QStringList Spofity::searchMusic(QString word){
         QJsonObject jsonSubObject = jsonObject["tracks"].toObject();
         QJsonArray jsonArray = jsonSubObject["items"].toArray();
 
-        wordList.clear();
-        tempList.clear();
+        this->wordList.clear();
+        this->tempList.clear();
 
         foreach (const QJsonValue & value, jsonArray) {
             QJsonObject obj = value.toObject();
             QJsonArray artist = obj["artists"].toArray();
             QJsonObject ob = artist[0].toObject();
 
-            wordList << obj["name"].toString() + " - " + ob["name"].toString();
-            tempList.insert( obj["name"].toString() + " - " + ob["name"].toString(), obj["id"].toString());
+            this->wordList << obj["name"].toString() + " - " + ob["name"].toString();
+            this->tempList.insert( obj["name"].toString() + " - " + ob["name"].toString(), obj["id"].toString());
         }
 
         reply->deleteLater();
     });
 
-    return wordList;
+    return this->wordList;
 }
 
 bool Spofity::addList(QString listName){
@@ -155,30 +138,6 @@ QStringList Spofity::getMusicsFromList(QString listName){
     return this->lists->getMusicsFromList(listName);
 }
 
-//void Spofity::playMusic(QString id){
-//    QUrl u ("https://api.spotify.com/v1/tracks/" + id);
-
-//    auto reply = this->connection.get(u);
-
-//    connect(reply, &QNetworkReply::finished, [=]() {
-//        if (reply->error() != QNetworkReply::NoError) {
-//            return;
-//        }
-//        const auto data = reply->readAll();
-//        const auto document = QJsonDocument::fromJson(data);
-//        QJsonObject jsonObject = document.object();
-
-//        qDebug()<<jsonObject["preview_url"].toString();
-
-//        QMediaPlayer* player = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
-//        player->setMedia(QUrl(jsonObject["preview_url"].toString()));
-//        player->setVolume(80);
-//        player->play();
-
-//        reply->deleteLater();
-//    });
-
-//}
 
 void Spofity::addMusicUrl(QString id){
     if(this->musicsWithUrl.contains(id)){
@@ -199,8 +158,6 @@ void Spofity::addMusicUrl(QString id){
         const auto document = QJsonDocument::fromJson(data);
         QJsonObject jsonObject = document.object();
 
-        //qDebug()<<jsonObject["preview_url"].toString();
-
         this->lists->addUrlToMusic(id, jsonObject["preview_url"].toString());
 
         reply->deleteLater();
@@ -214,4 +171,8 @@ bool Spofity::removeMusic(QString listName, QString musicName){
 
 QList<QMediaContent> Spofity::getMediaFromList(QString listName){
     return this->lists->getMediaFromList(listName);
+}
+
+QString Spofity::getUserName(){
+    return this->username;
 }

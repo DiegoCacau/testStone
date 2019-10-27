@@ -1,69 +1,90 @@
 #include "loggedwindow.h"
-#include "ui_loggedwindow.h"
-#include <QAbstractItemView>
-#include <QModelIndex>
-#include <QWidget>
 
-
-#include <QDebug>
 
 LoggedWindow::LoggedWindow(Spofity *sptf, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LoggedWindow)
 {
-    ui->setupUi(this);
+    this->ui->setupUi(this);
     this->sptf = sptf;
 
     this->playerStatus = "pause";
 
-    listNames = new QStringListModel(this);
-    this->ui->listView->setModel(listNames);
+    this->listNames = new QStringListModel(this);
+    this->ui->listView->setModel(this->listNames);
     this->ui->listView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    musicNames = new QStringListModel(this);
-    this->ui->listView_2->setModel(musicNames);
+    this->musicNames = new QStringListModel(this);
+    this->ui->listView_2->setModel(this->musicNames);
     this->ui->listView_2->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    activeList = new QStringListModel(this);
-    this->ui->listView_3->setModel(activeList);
+    this->activeList = new QStringListModel(this);
+    this->ui->listView_3->setModel(this->activeList);
     this->ui->listView_3->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     this->player = new QMediaPlayer(this);
     this->playlist = new QMediaPlaylist(this->player);
     this->player->setPlaylist(this->playlist);
 
+    QWidget* w = this->ui->tabWidget->findChild<QWidget*>("tab_2");
+    this->ui->tabWidget->setCurrentWidget(w);
+
     connect(this->player,SIGNAL(positionChanged(qint64)),this,SLOT(positionChangedByPlayer(qint64)));
-    connect(ui->horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(positionChangedByUser(int)));
+    connect(this->ui->horizontalSlider, SIGNAL(sliderMoved(int)), this, SLOT(positionChangedByUser(int)));
     connect(this->playlist,SIGNAL(currentIndexChanged(int)),this,SLOT(updateMusicPlaying(int)));
+    connect(this->sptf, &Spofity::openAfterLogin, this, &LoggedWindow::updateWindowName);
+
     this->ui->horizontalSlider->setRange(0,1000);
 
-
+    this->musicsModel = new QStringListModel();
+    this->completer = new QCompleter(this->musicsModel, this);
+    this->completer->setCaseSensitivity(Qt::CaseInsensitive);
+    this->completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    this->ui->lineEdit_2->setCompleter(this->completer);
+    connect(this->completer, SIGNAL(activated(const QString &)), this, SLOT(completerSelected(const QString &)));
+    connect(this->completer, SIGNAL(highlighted(const QString &)), this, SLOT(completerSelected(const QString &)));
 }
 
 LoggedWindow::~LoggedWindow()
 {
-    delete ui;
+    delete this->completer;
+    delete this->listNames;
+    delete this->musicNames;
+    delete this->activeList;
+    delete this->player;
+    delete this->ui;
 }
 
 void LoggedWindow::on_lineEdit_2_textChanged(const QString &arg1)
 {
 
+    if(!this->selectedList.isValid()){
+        this->ui->lineEdit_2->clear();
+
+        this->showWarningMessage("Antes de continuar, crie e selecione uma playlist.");
+    }
+
+
     if(arg1.size() > 2){
-        completer = new QCompleter(this->sptf->searchMusic(arg1), this);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        completer->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-        ui->lineEdit_2->setCompleter(completer);
+        musicsModel->setStringList(this->sptf->searchMusic(arg1));
     }
 }
 
 void LoggedWindow::on_pushButton_clicked()
 {
-    QString name = ui->lineEdit->text();
+    QString name = this->ui->lineEdit->text();
+
+    if(name.size() < 1){
+        this->showWarningMessage("Preencha o campo com o nome da playlist.");
+        return;
+    }
 
     if(this->sptf->addList(name)){
-        listNames->insertRow(listNames->rowCount());
-        QModelIndex index = listNames->index(listNames->rowCount() - 1);
+        this->listNames->insertRow(this->listNames->rowCount());
+        QModelIndex index = this->listNames->index(this->listNames->rowCount() - 1);
         listNames->setData(index, name);
+
+        this->ui->lineEdit->clear();
     }
 }
 
@@ -78,9 +99,9 @@ void LoggedWindow::on_listView_clicked(const QModelIndex &index)
 
     for ( const auto& name : musicsNames  )
     {
-        musicNames->insertRow(musicNames->rowCount());
-        QModelIndex index = musicNames->index(musicNames->rowCount() - 1);
-        musicNames->setData(index, name);
+        this->musicNames->insertRow(this->musicNames->rowCount());
+        QModelIndex index = this->musicNames->index(this->musicNames->rowCount() - 1);
+        this->musicNames->setData(index, name);
     }
 }
 
@@ -88,23 +109,35 @@ void LoggedWindow::on_pushButton_3_clicked()
 {
     QString name = this->ui->lineEdit_2->text();
 
-    QStringList auxList = musicNames->stringList();
+    QStringList auxList = this->musicNames->stringList();
+
+    if(this->selected != name){
+        this->showWarningMessage("Música não encontrada. Tente fazer nova busca.");
+        return;
+    }
 
     if(this->selectedList.isValid() && !auxList.contains(name)){
 
 
        this->sptf->addMusicToList(this->listNames->itemData(this->selectedList)[0].toString(), name);
 
-        musicNames->insertRow(musicNames->rowCount());
-        QModelIndex index = musicNames->index(musicNames->rowCount() - 1);
-        musicNames->setData(index, name);
+        this->musicNames->insertRow(this->musicNames->rowCount());
+        QModelIndex index = this->musicNames->index(this->musicNames->rowCount() - 1);
+        this->musicNames->setData(index, name);
+
+        this->ui->lineEdit_2->clear();
     }
 }
 
 
 void LoggedWindow::on_pushButton_7_clicked()
 {
-    this->selectedList = ui->listView->currentIndex();
+    this->selectedList = this->ui->listView->currentIndex();
+
+    if(!this->selectedList.isValid()){
+        this->showWarningMessage("Antes de continuar, crie e selecione uma playlist.");
+        return;
+    }
 
     QString rowValue = this->listNames->itemData(this->selectedList)[0].toString();
     QStringList musicsNames = this->sptf->getMusicsFromList(rowValue);
@@ -113,15 +146,20 @@ void LoggedWindow::on_pushButton_7_clicked()
 
     for ( const auto& name : musicsNames  )
     {
-        musicNames->insertRow(musicNames->rowCount());
-        QModelIndex index = musicNames->index(musicNames->rowCount() - 1);
-        musicNames->setData(index, name);
+        this->musicNames->insertRow(this->musicNames->rowCount());
+        QModelIndex index = this->musicNames->index(this->musicNames->rowCount() - 1);
+        this->musicNames->setData(index, name);
     }
 }
 
 void LoggedWindow::on_pushButton_2_clicked()
 {
-    this->selectedList = ui->listView->currentIndex();
+    this->selectedList = this->ui->listView->currentIndex();
+
+    if(!this->selectedList.isValid()){
+        this->showWarningMessage("Antes de continuar, crie e selecione uma playlist.");
+        return;
+    }
 
     QString rowValue = this->listNames->itemData(this->selectedList)[0].toString();
     QStringList musicsNames = this->sptf->getMusicsFromList(rowValue);
@@ -130,9 +168,9 @@ void LoggedWindow::on_pushButton_2_clicked()
 
     for ( const auto& name : musicsNames  )
     {
-        activeList->insertRow(activeList->rowCount());
-        QModelIndex index = activeList->index(activeList->rowCount() - 1);
-        activeList->setData(index, name);
+        this->activeList->insertRow(this->activeList->rowCount());
+        QModelIndex index = this->activeList->index(this->activeList->rowCount() - 1);
+        this->activeList->setData(index, name);
     }
 
     QList<QMediaContent> content = this->sptf->getMediaFromList(rowValue);
@@ -140,45 +178,53 @@ void LoggedWindow::on_pushButton_2_clicked()
 
     QWidget* w = this->ui->tabWidget->findChild<QWidget*>("tab_3");
     this->ui->tabWidget->setCurrentWidget(w);
+
+    this->player->play();
 }
 
 void LoggedWindow::on_listView_3_clicked(const QModelIndex &index)
 {
-//    this->selectedList = index;
+    this->playlist->setCurrentIndex(index.row());
 
-//    QString rowValue = this->listNames->itemData(this->selectedList)[0].toString();
-//    QStringList musicsNames = this->sptf->getMusicsFromList(rowValue);
-
-//    this->musicNames->setStringList( QStringList{} );
-
-//    for ( const auto& name : musicsNames  )
-//    {
-//        musicNames->insertRow(musicNames->rowCount());
-//        QModelIndex index = musicNames->index(musicNames->rowCount() - 1);
-//        musicNames->setData(index, name);
-//    }
 }
 
 
 void LoggedWindow::on_pushButton_4_clicked()
 {
-    if(ui->listView_2->currentIndex().isValid()){
-        QString musicName = this->musicNames->itemData(ui->listView_2->currentIndex())[0].toString();
+    if(this->ui->listView_2->currentIndex().isValid()){
+        QString musicName = this->musicNames->itemData(this->ui->listView_2->currentIndex())[0].toString();
          QString listName = this->listNames->itemData(this->selectedList)[0].toString();
 
         if(this->sptf->removeMusic(listName, musicName)){
-            musicNames->removeRow(ui->listView_2->currentIndex().row());
+            this->musicNames->removeRow(this->ui->listView_2->currentIndex().row());
+
+            QStringList musicsNames = this->musicNames->stringList();
+            this->activeList->setStringList( QStringList{} );
+
+            for ( const auto& name :musicsNames  )
+            {
+                this->activeList->insertRow(this->activeList->rowCount());
+                QModelIndex index = this->activeList->index(this->activeList->rowCount() - 1);
+                this->activeList->setData(index, name);
+            }
+
+            this->stopPlayer();
         }
     }
 }
 
 void LoggedWindow::on_pushButton_6_clicked()
 {
-    this->player->stop();
+    this->stopPlayer();
 }
 
 void LoggedWindow::on_pushButton_5_clicked()
 {
+    if(!this->selectedList.isValid()){
+        this->showWarningMessage("Antes de continuar, crie e selecione uma playlist.");
+        return;
+    }
+
     if(this->playerStatus == "pause"){
         this->player->play();
         this->playerStatus = "playing";
@@ -201,7 +247,7 @@ void LoggedWindow::positionChangedByPlayer(qint64 position) {
     currentPosition = static_cast<int>((position / duration) * 1000);
 
     if (currentPosition >= 0 && currentPosition <= 1000) {
-      ui->horizontalSlider->setValue(currentPosition);
+      this->ui->horizontalSlider->setValue(currentPosition);
     }
 
     int minutes = static_cast<int>(position / 60000);
@@ -223,8 +269,11 @@ void LoggedWindow::positionChangedByUser(int position) {
 }
 
 void LoggedWindow::updateMusicPlaying(int index){
-    if(this->musicNames->stringList().size() > index && index >= 0)
+    if(this->musicNames->stringList().size() > index && index >= 0){
         this->ui->label_3->setText(this->musicNames->stringList().at(index));
+
+        this->ui->listView_3->setCurrentIndex(this->activeList->index(index));
+    }
 }
 
 void LoggedWindow::on_pushButton_10_clicked()
@@ -237,4 +286,28 @@ void LoggedWindow::on_pushButton_9_clicked()
 {
     if(this->playlist->previousIndex() >= 0)
         this->playlist->previous();
+}
+
+
+void LoggedWindow::showWarningMessage(QString message){
+    this->msgBox.setText(message);
+    this->msgBox.exec();
+    return;
+}
+
+void LoggedWindow::stopPlayer(){
+    this->player->stop();
+    this->playerStatus = "pause";
+    this->ui->pushButton_5->setText("Tocar");
+    this->ui->label_4->clear();
+    this->ui->label_3->clear();
+}
+
+void LoggedWindow::updateWindowName(){
+    this->setWindowTitle("Playlists de " + this->sptf->getUserName());
+}
+
+void LoggedWindow::completerSelected(const QString &name){
+    if(!name.isEmpty())
+        this->selected = name;
 }

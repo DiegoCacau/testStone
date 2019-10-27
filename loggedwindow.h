@@ -7,6 +7,11 @@
 #include <QStringListModel>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include <QMessageBox>
+#include "ui_loggedwindow.h"
+#include <QAbstractItemView>
+#include <QModelIndex>
+#include <QWidget>
 
 namespace Ui {
 class LoggedWindow;
@@ -21,10 +26,12 @@ class LoggedWindow : public QWidget
     QStringListModel *musicNames;
     QStringListModel *activeList;
     QModelIndex selectedList;
-
+    QMessageBox msgBox;
     QMediaPlayer *player;
     QMediaPlaylist *playlist;
     QString playerStatus;
+    QStringListModel* musicsModel;
+    QString selected;
 
 public:
     explicit LoggedWindow(Spofity *sptf, QWidget *parent = nullptr);
@@ -58,17 +65,35 @@ private slots:
     // remove selected music from playlist
     void on_pushButton_4_clicked();
 
+    // stop player
     void on_pushButton_6_clicked();
 
+    // update elapsed music time
     void positionChangedByPlayer(qint64);
 
+    // update music position
     void positionChangedByUser(int);
 
+    // update music label and listview row based on playing music
     void updateMusicPlaying(int);
 
+    // change playlist to next music
     void on_pushButton_10_clicked();
 
+    // change playlist to previous music
     void on_pushButton_9_clicked();
+
+    // display an warning
+    void showWarningMessage(QString);
+
+    // stop player
+    void stopPlayer();
+
+    // change window name
+    void updateWindowName();
+
+    // update selected music name
+    void completerSelected(const QString &index);
 
 private:
     Ui::LoggedWindow *ui;

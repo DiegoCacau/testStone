@@ -41,10 +41,13 @@ public:
     // return musics from playlist
     QStringList getMusicsFromList(QString);
 
+    // add url to music
     void addUrlToMusic(QString, QString);
 
+    // remove music from list
     bool removeMusic(QString, QString);
 
+    // Return musics from list
     QList<QMediaContent> getMediaFromList(QString);
 
 
