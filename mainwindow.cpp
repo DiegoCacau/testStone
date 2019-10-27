@@ -1,29 +1,24 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-
-#include"spofity.h"
-#include <QtNetworkAuth>
-#include <QJsonDocument>
-#include <QDesktopServices>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
 
-    ui->setupUi(this);
-    sptf = new Spofity();
+    this->ui->setupUi(this);
+    this->sptf = new Spofity();
 
-    loggedWindow = new LoggedWindow(sptf);
+    this->loggedWindow = new LoggedWindow(this->sptf);
 
-    QObject::connect(sptf, &Spofity::openAfterLogin, this, &MainWindow::openLoggedWindow);
+    connect(this->sptf, &Spofity::openAfterLogin, this, &MainWindow::openLoggedWindow);
 
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete this->sptf;
+    delete this->loggedWindow;
+    delete this->ui;
 }
 
 
@@ -33,6 +28,11 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::openLoggedWindow(){
-    hide();
-    loggedWindow->show();
+    emit(hidding());
+    this->hide();
+    this->loggedWindow->show();
+}
+
+LoggedWindow* MainWindow::getLoggegWindow(){
+    return this->loggedWindow;
 }
