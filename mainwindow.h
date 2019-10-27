@@ -18,8 +18,6 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    Spofity *sptf;
-    LoggedWindow *loggedWindow;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -34,5 +32,15 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    Spofity *sptf;
+    LoggedWindow *loggedWindow;
+
+public:
+    // Although it is not safe this method is plublic for make it easy to test LoggedWindow object
+    LoggedWindow* getLoggegWindow();
+
+signals:
+   // signal to make it easy to test this app
+   void hidding();
 };
 #endif // MAINWINDOW_H

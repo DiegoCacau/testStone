@@ -28,6 +28,11 @@ void MainWindow::on_pushButton_clicked()
 }
 
 void MainWindow::openLoggedWindow(){
+    emit(hidding());
     this->hide();
     this->loggedWindow->show();
+}
+
+LoggedWindow* MainWindow::getLoggegWindow(){
+    return this->loggedWindow;
 }
